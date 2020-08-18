@@ -17,11 +17,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     dbadapter.cpp \
+    elserver.cpp \
     main.cpp \
     mainwidget.cpp
 
 HEADERS += \
     dbadapter.h \
+    elserver.h \
     mainwidget.h
 
 FORMS += \
