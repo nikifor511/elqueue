@@ -17,5 +17,6 @@ public:
 
 private:
     Ui::MainWidget *ui;
+    int y;
 };
 #endif // MAINWIDGET_H
