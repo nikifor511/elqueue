@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,16 +18,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     dbadapter.cpp \
     elserver.cpp \
-    main.cpp \
-    mainwidget.cpp
+    main.cpp
 
 HEADERS += \
     dbadapter.h \
     elserver.h \
-    mainwidget.h
+    main.h
 
-FORMS += \
-    mainwidget.ui
+FORMS +=
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
