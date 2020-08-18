@@ -25,6 +25,7 @@ private:
 
 public slots:
     QJsonArray getCurrentTasks();
+    bool setOperatorToTask(int taskID, int operatorID);
 
 };
 

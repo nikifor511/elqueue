@@ -4,8 +4,8 @@
 DbAdapter::DbAdapter()
 {
     sdb = QSqlDatabase::addDatabase("QSQLITE");
-//    sdb.setDatabaseName("/home/nikifor/qtProjects/s_eq/s_eq//eq.db");
-    sdb.setDatabaseName("D:/qt_projects/s_eq/s_eq/eq.db");
+    sdb.setDatabaseName("/home/nikifor/qtProjects/elqueue/elqueue/eq.db");
+//    sdb.setDatabaseName("D:/qt_projects/s_eq/s_eq/eq.db");
 }
 
 QJsonArray DbAdapter::queryExec(QString sql_str)
@@ -44,4 +44,9 @@ QJsonArray DbAdapter::getCurrentTasks()
 {
     QJsonArray res = this->queryExec("SELECT * FROM task WHERE operator_ID ISNULL;");
     return res;
+}
+
+bool DbAdapter::setOperatorToTask(int taskID, int operatorID)
+{
+
 }

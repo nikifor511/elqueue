@@ -55,22 +55,29 @@ void ElServer::user_disconnect()
 
 void ElServer::slotReadClient()
 {
-    QTcpSocket* clientSocket = (QTcpSocket*)sender();
-    QByteArray datas = clientSocket->readAll();
-    if (datas.compare("#getCurrentTasks") == 0)
-    {
+    QTcpSocket* senderSocket = (QTcpSocket*)sender();
+    QByteArray datas = senderSocket->readAll();
+
+    if (datas.compare("#getCurrentTasks") == 0) {
         QJsonArray currentTasks = emit getCurrentTasks();
         QJsonDocument currentTasksJD;
         currentTasksJD.setArray(currentTasks);
 
         QString message(currentTasksJD.toJson());
         message = "#currentTasks" + message;
-        clientSocket->write(message.toUtf8());
-
-
-
-        //qDebug() << QString::number(res);
+        senderSocket->write(message.toUtf8());
     }
+
+    if (datas.indexOf("#iwantgettask") != -1) {
+        datas.replace("#iwantgettask", "");
+        int taskID = datas.toInt();
+        qDebug() << QString::number(taskID);
+
+
+        QHostAddress hostSender = senderSocket->peerAddress();
+        qDebug() << hostSender.toString();
+    }
+
 
     qDebug() << QString::fromUtf8("ReadClient:" + datas + "\n");
 }
