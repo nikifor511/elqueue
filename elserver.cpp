@@ -1,12 +1,12 @@
 #include "elserver.h"
 #include <QDebug>
 
-ElServer::ElServer()
+ElServer::ElServer(const int port)
 {
-
+    this->port = port;
 }
 
-bool ElServer::start(const int port)
+bool ElServer::start()
 {
     if (!tcpServer)
     {
@@ -14,7 +14,7 @@ bool ElServer::start(const int port)
         connect(tcpServer, &QTcpServer::newConnection, this, &ElServer::newuser);
     }
 
-    if (!tcpServer->listen(QHostAddress::Any, port) && server_status==0)
+    if (!tcpServer->listen(QHostAddress::Any, this->port) && server_status==0)
     {
         qDebug() << tcpServer->errorString();
         return false;
@@ -58,13 +58,13 @@ void ElServer::slotReadClient()
     QTcpSocket* senderSocket = (QTcpSocket*)sender();
     QByteArray datas = senderSocket->readAll();
 
-    if (datas.compare("#getCurrentTasks") == 0) {
-        QJsonArray currentTasks = emit getCurrentTasks();
-        QJsonDocument currentTasksJD;
-        currentTasksJD.setArray(currentTasks);
+    if (datas.compare("#getFreeTasks") == 0) {
+        QJsonArray freeTasks = emit getFreeTasks();
+        QJsonDocument freeTasksJD;
+        freeTasksJD.setArray(freeTasks);
 
-        QString message(currentTasksJD.toJson());
-        message = "#currentTasks" + message;
+        QString message(freeTasksJD.toJson());
+        message = "#freeTasks" + message;
         senderSocket->write(message.toUtf8());
     }
 
@@ -73,11 +73,28 @@ void ElServer::slotReadClient()
         int taskID = datas.toInt();
         qDebug() << QString::number(taskID);
 
+        QString hostSender = senderSocket->peerAddress().toString().replace("::ffff:", "");   //TODO Get ipv4 adress
+        qDebug() << hostSender;
+        if (emit setOperatorToTask(hostSender, taskID)) {
+            QString answer = "#yourcurrenttask" + QString::number(taskID);
+            senderSocket->write(answer.toUtf8());
 
-        QHostAddress hostSender = senderSocket->peerAddress();
-        qDebug() << hostSender.toString();
+            QJsonArray freeTasks = emit getFreeTasks();
+            QJsonDocument freeTasksJD;
+            freeTasksJD.setArray(freeTasks);
+
+            QString message(freeTasksJD.toJson());
+            message = "#freeTasks" + message;
+            senderSocket->write(message.toUtf8());
+
+
+
+        }
+
     }
 
 
     qDebug() << QString::fromUtf8("ReadClient:" + datas + "\n");
 }
+
+

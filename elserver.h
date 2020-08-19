@@ -11,12 +11,13 @@ class ElServer: public QObject
 {
     Q_OBJECT
 public:
-    ElServer();
-    bool start(const int port);
+    ElServer(const int port);
+    bool start();
 //    void stop();
 
 private:
     QTcpServer *tcpServer = NULL;
+    int port;
     int server_status;
     QMap<int, QTcpSocket *> SClients;
 
@@ -26,7 +27,8 @@ private slots:
     void slotReadClient();
 
 signals:
-    QJsonArray getCurrentTasks();
+    QJsonArray getFreeTasks();
+    bool setOperatorToTask(QString operatorIP, int taskID);
 
 };
 

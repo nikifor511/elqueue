@@ -2,6 +2,8 @@
 #define MAIN_H
 
 #include <QObject>
+#include <QThread>
+
 
 #include "dbadapter.h"
 #include "elserver.h"

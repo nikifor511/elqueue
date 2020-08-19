@@ -24,8 +24,9 @@ private:
     QSqlDatabase sdb;
 
 public slots:
-    QJsonArray getCurrentTasks();
-    bool setOperatorToTask(int taskID, int operatorID);
+    QJsonArray getFreeTasks();
+    bool setOperatorToTask(QString operatorIP, int taskID);
+
 
 };
 
