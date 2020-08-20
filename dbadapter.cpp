@@ -18,8 +18,7 @@ QJsonArray DbAdapter::queryExec(QString sql_str)
     QSqlQuery query(sql_str);
 //    query.last();
 
-    if (sql_str.indexOf("INSERT") > -1)
-    {
+    if (sql_str.indexOf("INSERT") > -1) {
         bool last =  query.last();
         int y=8;
         int r = 9;
@@ -55,6 +54,4 @@ bool DbAdapter::setOperatorToTask(QString operatorIP, int taskID)
     int operatorID = this->queryExec("SELECT ID FROM operator WHERE host = '" + operatorIP + "'")[0].toObject()["ID"].toInt();
     this->queryExec("UPDATE task SET operator_ID = " + QString::number(operatorID) + " WHERE ID = " + QString::number(taskID));
     return true;
-
-
 }

@@ -59,13 +59,9 @@ void ElServer::slotReadClient()
     QByteArray datas = senderSocket->readAll();
 
     if (datas.compare("#getFreeTasks") == 0) {
-        QJsonArray freeTasks = emit getFreeTasks();
-        QJsonDocument freeTasksJD;
-        freeTasksJD.setArray(freeTasks);
 
-        QString message(freeTasksJD.toJson());
-        message = "#freeTasks" + message;
-        senderSocket->write(message.toUtf8());
+        QString message = this->getFreeTasksFromDB();
+        this->writeData(message.toUtf8(), senderSocket);
     }
 
     if (datas.indexOf("#iwantgettask") != -1) {
@@ -77,24 +73,39 @@ void ElServer::slotReadClient()
         qDebug() << hostSender;
         if (emit setOperatorToTask(hostSender, taskID)) {
             QString answer = "#yourcurrenttask" + QString::number(taskID);
-            senderSocket->write(answer.toUtf8());
-
-            QJsonArray freeTasks = emit getFreeTasks();
-            QJsonDocument freeTasksJD;
-            freeTasksJD.setArray(freeTasks);
-
-            QString message(freeTasksJD.toJson());
-            message = "#freeTasks" + message;
-            senderSocket->write(message.toUtf8());
-
-
-
+            this->writeData(answer.toUtf8(), senderSocket);
         }
 
+        this->updateFreeTasksForClients();
     }
-
-
     qDebug() << QString::fromUtf8("ReadClient:" + datas + "\n");
 }
+
+void ElServer::updateFreeTasksForClients()
+{
+    QString message = this->getFreeTasksFromDB();
+    foreach (QTcpSocket *_tcpSocket, SClients) {
+        this->writeData(message.toUtf8(), _tcpSocket);
+//            tcpSocket->write(message.toUtf8());
+    }
+}
+
+QString ElServer::getFreeTasksFromDB()
+{
+    QJsonArray freeTasks = emit getFreeTasks();
+    QJsonDocument freeTasksJD;
+    freeTasksJD.setArray(freeTasks);
+
+    QString message(freeTasksJD.toJson());
+    message = "#freeTasks" + message;
+    return message;
+}
+
+bool ElServer::writeData(QByteArray data, QTcpSocket *_socket)
+{
+    _socket->write(data + "$");
+}
+
+
 
 

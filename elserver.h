@@ -13,6 +13,7 @@ class ElServer: public QObject
 public:
     ElServer(const int port);
     bool start();
+
 //    void stop();
 
 private:
@@ -25,6 +26,10 @@ private slots:
     void newuser();
     void user_disconnect();
     void slotReadClient();
+    void updateFreeTasksForClients();
+    QString getFreeTasksFromDB();
+    bool writeData(QByteArray data, QTcpSocket *_socket);
+
 
 signals:
     QJsonArray getFreeTasks();
