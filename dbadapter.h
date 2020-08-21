@@ -17,7 +17,7 @@ class DbAdapter: public QObject
 
 public:
     DbAdapter();
-    QJsonArray queryExec(const QString sql_str);
+    QJsonArray queryExec(QSqlQuery);
 
 
 private:
@@ -26,6 +26,7 @@ private:
 public slots:
     QJsonArray getFreeTasks();
     bool setOperatorToTask(QString operatorIP, int taskID);
+    QJsonArray getTaskDataToOperator(const int taskID);
 
 
 };

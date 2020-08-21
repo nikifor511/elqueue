@@ -27,13 +27,14 @@ private slots:
     void user_disconnect();
     void slotReadClient();
     void updateFreeTasksForClients();
-    QString getFreeTasksFromDB();
+    QString JsonArrayToString(const QJsonArray dataArray);
     bool writeData(QByteArray data, QTcpSocket *_socket);
 
 
 signals:
     QJsonArray getFreeTasks();
     bool setOperatorToTask(QString operatorIP, int taskID);
+    QJsonArray getTaskDataToOperator(int taskID);
 
 };
 

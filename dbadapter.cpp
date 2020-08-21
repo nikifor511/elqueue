@@ -6,24 +6,13 @@ DbAdapter::DbAdapter()
     sdb = QSqlDatabase::addDatabase("QSQLITE");
 //    sdb.setDatabaseName("/home/nikifor/qtProjects/elqueue/elqueue/eq.db");
     sdb.setDatabaseName("D:/qt_projects/elqueue/elqueue/eq.db");
+
 }
 
-QJsonArray DbAdapter::queryExec(QString sql_str)
+QJsonArray DbAdapter::queryExec(QSqlQuery query)
 {
-    if (sdb.open()) {
-          qDebug() << "open db!!!!";
-    }
-
     QJsonArray recordsArray;
-    QSqlQuery query(sql_str);
-//    query.last();
-
-    if (sql_str.indexOf("INSERT") > -1) {
-        bool last =  query.last();
-        int y=8;
-        int r = 9;
-
-    }
+    query.exec();
 
     while (query.next()) {
         QJsonObject recordObject;
@@ -34,24 +23,56 @@ QJsonArray DbAdapter::queryExec(QString sql_str)
         }
         recordsArray.push_back(recordObject);
     }
-
-    sdb.close();
     return recordsArray;
 }
 
 QJsonArray DbAdapter::getFreeTasks()
 {
-    QJsonArray res = this->queryExec("SELECT * FROM task WHERE operator_ID ISNULL;");
+    sdb.open();
+    QSqlQuery query;
+    query.prepare("SELECT * FROM task WHERE operator_ID ISNULL;");
+    QJsonArray res = this->queryExec(query);
 
+    sdb.close();
     return res;
 }
 
 bool DbAdapter::setOperatorToTask(QString operatorIP, int taskID)
 {
-//    QJsonArray operatorID_JA = this->queryExec("SELECT ID FROM operator WHERE host = '" + operatorIP + "'");
-//    QJsonObject operatorID_obj = operatorID_JA[0].toObject();
-//    int id = operatorID_obj["ID"].toInt();
-    int operatorID = this->queryExec("SELECT ID FROM operator WHERE host = '" + operatorIP + "'")[0].toObject()["ID"].toInt();
-    this->queryExec("UPDATE task SET operator_ID = " + QString::number(operatorID) + " WHERE ID = " + QString::number(taskID));
+    sdb.open();
+    QSqlQuery query;
+    query.prepare("SELECT ID FROM operator WHERE host = :host");
+    query.bindValue(":host", operatorIP);
+    int operatorID = this->queryExec(query)[0].toObject()["ID"].toInt();
+    QDateTime now = QDateTime::currentDateTime();
+    QString nowStr = now.toString("yyyy-MM-dd hh:mm:ss");
+
+    //QSqlQuery query;
+    query.prepare("UPDATE task SET" \
+                  " operator_ID = :operator_ID," \
+                  " taccept = :taccept" \
+                  " WHERE ID = :ID");
+
+    query.bindValue(":operator_ID", operatorID);
+    query.bindValue(":taccept", nowStr);
+    query.bindValue(":ID", taskID);
+    this->queryExec(query);
+
+    sdb.close();
     return true;
+}
+
+QJsonArray DbAdapter::getTaskDataToOperator(const int taskID)
+{
+    sdb.open();
+    QSqlQuery query;
+    query.prepare("SELECT task.ID, tbegin, ticket, name "  \
+                  "FROM task " \
+                  "JOIN service " \
+                  "ON task.service_ID = service.ID AND task.ID = :taskID");
+    query.bindValue(":taskID", taskID);
+    QJsonArray res = this->queryExec(query);
+
+    sdb.close();
+    return res;
 }

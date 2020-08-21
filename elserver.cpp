@@ -60,7 +60,7 @@ void ElServer::slotReadClient()
 
     if (datas.compare("#getFreeTasks") == 0) {
 
-        QString message = this->getFreeTasksFromDB();
+        QString message = "#freeTasks" + this->JsonArrayToString(emit getFreeTasks());
         this->writeData(message.toUtf8(), senderSocket);
     }
 
@@ -72,8 +72,8 @@ void ElServer::slotReadClient()
         QString hostSender = senderSocket->peerAddress().toString().replace("::ffff:", "");   //TODO Get ipv4 adress
         qDebug() << hostSender;
         if (emit setOperatorToTask(hostSender, taskID)) {
-            QString answer = "#yourcurrenttask" + QString::number(taskID);
-            this->writeData(answer.toUtf8(), senderSocket);
+            QString message = "#yourcurrenttask" + this->JsonArrayToString(emit getTaskDataToOperator(taskID));
+            this->writeData(message.toUtf8(), senderSocket);
         }
 
         this->updateFreeTasksForClients();
@@ -83,21 +83,18 @@ void ElServer::slotReadClient()
 
 void ElServer::updateFreeTasksForClients()
 {
-    QString message = this->getFreeTasksFromDB();
+    QString message = "#freeTasks" + this->JsonArrayToString(emit getFreeTasks());
     foreach (QTcpSocket *_tcpSocket, SClients) {
         this->writeData(message.toUtf8(), _tcpSocket);
-//            tcpSocket->write(message.toUtf8());
     }
 }
 
-QString ElServer::getFreeTasksFromDB()
-{
-    QJsonArray freeTasks = emit getFreeTasks();
+QString ElServer::JsonArrayToString(const QJsonArray dataArray)
+{    
     QJsonDocument freeTasksJD;
-    freeTasksJD.setArray(freeTasks);
-
+    freeTasksJD.setArray(dataArray);
     QString message(freeTasksJD.toJson());
-    message = "#freeTasks" + message;
+
     return message;
 }
 
