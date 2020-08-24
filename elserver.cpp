@@ -101,8 +101,5 @@ QString ElServer::JsonArrayToString(const QJsonArray dataArray)
 bool ElServer::writeData(QByteArray data, QTcpSocket *_socket)
 {
     _socket->write(data + "$");
+
 }
-
-
-
-
