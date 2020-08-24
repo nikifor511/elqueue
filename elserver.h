@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QByteArray>
 
+#include "task.h"
+
 
 class ElServer: public QObject
 {
@@ -27,14 +29,16 @@ private slots:
     void user_disconnect();
     void slotReadClient();
     void updateFreeTasksForClients();
-    QString JsonArrayToString(const QJsonArray dataArray);
+    QString taskToJsonString(const Task* task);
+    QString taskListToJsonString(const QList<Task*> tasks);
+
     bool writeData(QByteArray data, QTcpSocket *_socket);
 
 
 signals:
-    QJsonArray getFreeTasks();
+    QList<Task*> getFreeTasks();
     bool setOperatorToTask(QString operatorIP, int taskID);
-    QJsonArray getTaskDataToOperator(int taskID);
+    Task* getTaskDataToOperator(int taskID);
 
 };
 

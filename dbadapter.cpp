@@ -26,13 +26,30 @@ QJsonArray DbAdapter::queryExec(QSqlQuery query)
     return recordsArray;
 }
 
-QJsonArray DbAdapter::getFreeTasks()
+QList<Task*> DbAdapter::getFreeTasks()
 {
     sdb.open();
     QSqlQuery query;
-    query.prepare("SELECT * FROM task WHERE operator_ID ISNULL;");
-    QJsonArray res = this->queryExec(query);
+    query.prepare("SELECT task.ID, task.tbegin, task.taccept, task.tend, task.ticket, task.operator_ID, service.name " \
+                  "FROM task " \
+                  "JOIN service " \
+                  "ON task.service_ID = service.ID AND task.operator_ID ISNULL ");
+    query.exec();
+    QList<Task*> res;
+    while (query.next()) {
+        QString tBeginStr = query.value("tbegin").toString();
+        QDateTime tBeginDT = QDateTime::fromString(tBeginStr, "yyyy-MM-dd hh:mm:ss");
+        qDebug() << "tBeginDT: " <<tBeginDT.toString("hh:mm:ss yyyy-MM-dd");
+        Task *someTask = new Task(query.value("ID").toInt(),
+                                  tBeginDT,
+                                  QDateTime::fromString(query.value("taccept").toString(), "yyyy-MM-dd hh:mm:ss"),
+                                  QDateTime::fromString(query.value("tend").toString(), "yyyy-MM-dd hh:mm:ss"),
+                                  query.value("ticket").toString(),
+                                  query.value("operator_ID").toInt(),
+                                  query.value("name").toString());
 
+        res.append(someTask);
+    }
     sdb.close();
     return res;
 }
@@ -62,17 +79,25 @@ bool DbAdapter::setOperatorToTask(QString operatorIP, int taskID)
     return true;
 }
 
-QJsonArray DbAdapter::getTaskDataToOperator(const int taskID)
+Task* DbAdapter::getTaskDataToOperator(const int taskID)
 {
     sdb.open();
     QSqlQuery query;
-    query.prepare("SELECT task.ID, tbegin, ticket, name "  \
+    query.prepare("SELECT task.ID, task.tbegin, task.taccept, task.tend, task.ticket, task.operator_ID, service.name "  \
                   "FROM task " \
                   "JOIN service " \
                   "ON task.service_ID = service.ID AND task.ID = :taskID");
     query.bindValue(":taskID", taskID);
-    QJsonArray res = this->queryExec(query);
+    query.exec();
+    query.next();
 
+    Task *res = new Task(query.value(0).toInt(),
+                         query.value(1).toDateTime(),
+                         query.value(2).toDateTime(),
+                         query.value(3).toDateTime(),
+                         query.value(4).toString(),
+                         query.value(5).toInt(),
+                         query.value(6).toString());
     sdb.close();
     return res;
 }

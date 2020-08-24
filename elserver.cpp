@@ -60,7 +60,7 @@ void ElServer::slotReadClient()
 
     if (datas.compare("#getFreeTasks") == 0) {
 
-        QString message = "#freeTasks" + this->JsonArrayToString(emit getFreeTasks());
+        QString message = "#freeTasks" + this->taskListToJsonString(emit getFreeTasks());
         this->writeData(message.toUtf8(), senderSocket);
     }
 
@@ -72,7 +72,7 @@ void ElServer::slotReadClient()
         QString hostSender = senderSocket->peerAddress().toString().replace("::ffff:", "");   //TODO Get ipv4 adress
         qDebug() << hostSender;
         if (emit setOperatorToTask(hostSender, taskID)) {
-            QString message = "#yourcurrenttask" + this->JsonArrayToString(emit getTaskDataToOperator(taskID));
+            QString message = "#yourcurrenttask" + this->taskToJsonString(emit getTaskDataToOperator(taskID));
             this->writeData(message.toUtf8(), senderSocket);
         }
 
@@ -83,18 +83,47 @@ void ElServer::slotReadClient()
 
 void ElServer::updateFreeTasksForClients()
 {
-    QString message = "#freeTasks" + this->JsonArrayToString(emit getFreeTasks());
+    QString message = "#freeTasks" + this->taskListToJsonString(emit getFreeTasks());
     foreach (QTcpSocket *_tcpSocket, SClients) {
         this->writeData(message.toUtf8(), _tcpSocket);
     }
 }
 
-QString ElServer::JsonArrayToString(const QJsonArray dataArray)
+QString ElServer::taskToJsonString(const Task* task)
 {    
-    QJsonDocument freeTasksJD;
-    freeTasksJD.setArray(dataArray);
-    QString message(freeTasksJD.toJson());
+    QJsonObject taskObject;
+    taskObject.insert( "ID", QJsonValue::fromVariant(task->getID()));
+    taskObject.insert( "tBegin", QJsonValue::fromVariant(task->getTBegin()));
+    taskObject.insert( "tAccept", QJsonValue::fromVariant(task->getTAccept()));
+    taskObject.insert( "tEnd", QJsonValue::fromVariant(task->getTEnd()));
+    taskObject.insert( "ticket", QJsonValue::fromVariant(task->getTicket()));
+    taskObject.insert( "operatorID", QJsonValue::fromVariant(task->getOperatorID()));
+    taskObject.insert( "serviceName", QJsonValue::fromVariant(task->getServiceName()));
 
+    QJsonDocument taskJD;
+    taskJD.setObject(taskObject);
+    QString message = taskJD.toJson();
+    return message;
+}
+
+QString ElServer::taskListToJsonString(const QList<Task *> tasks)
+{
+    QJsonArray recordsArray;
+
+    foreach (const Task* task, tasks) {
+        QJsonObject recordObject;
+        recordObject.insert( "ID", QJsonValue::fromVariant(task->getID()));
+        recordObject.insert( "tBegin", QJsonValue::fromVariant(task->getTBegin()));
+        recordObject.insert( "tAccept", QJsonValue::fromVariant(task->getTAccept()));
+        recordObject.insert( "tEnd", QJsonValue::fromVariant(task->getTEnd()));
+        recordObject.insert( "ticket", QJsonValue::fromVariant(task->getTicket()));
+        recordObject.insert( "operatorID", QJsonValue::fromVariant(task->getOperatorID()));
+        recordObject.insert( "serviceName", QJsonValue::fromVariant(task->getServiceName()));
+        recordsArray.push_back(recordObject);
+    }
+    QJsonDocument tasksJD;
+    tasksJD.setArray(recordsArray);
+    QString message = tasksJD.toJson();
     return message;
 }
 

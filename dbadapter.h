@@ -11,6 +11,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "task.h"
+
 
 class DbAdapter: public QObject
 {
@@ -24,11 +26,9 @@ private:
     QSqlDatabase sdb;
 
 public slots:
-    QJsonArray getFreeTasks();
+    QList<Task*> getFreeTasks();
     bool setOperatorToTask(QString operatorIP, int taskID);
-    QJsonArray getTaskDataToOperator(const int taskID);
-
-
+    Task* getTaskDataToOperator(const int taskID);
 };
 
 #endif // DBADAPTER_H
