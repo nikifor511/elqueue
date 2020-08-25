@@ -37,13 +37,10 @@ QList<Task*> DbAdapter::getFreeTasks()
     query.exec();
     QList<Task*> res;
     while (query.next()) {
-        QString tBeginStr = query.value("tbegin").toString();
-        QDateTime tBeginDT = QDateTime::fromString(tBeginStr, "yyyy-MM-dd hh:mm:ss");
-        qDebug() << "tBeginDT: " <<tBeginDT.toString("hh:mm:ss yyyy-MM-dd");
         Task *someTask = new Task(query.value("ID").toInt(),
-                                  tBeginDT,
-                                  QDateTime::fromString(query.value("taccept").toString(), "yyyy-MM-dd hh:mm:ss"),
-                                  QDateTime::fromString(query.value("tend").toString(), "yyyy-MM-dd hh:mm:ss"),
+                                  QDateTime::fromString(query.value("tbegin").toString(), "yyyy-MM-dd hh:mm:SS"),
+                                  QDateTime::fromString(query.value("taccept").toString(), "yyyy-MM-dd hh:mm:SS"),
+                                  QDateTime::fromString(query.value("tend").toString(), "yyyy-MM-dd hh:mm:SS"),
                                   query.value("ticket").toString(),
                                   query.value("operator_ID").toInt(),
                                   query.value("name").toString());
@@ -62,7 +59,7 @@ bool DbAdapter::setOperatorToTask(QString operatorIP, int taskID)
     query.bindValue(":host", operatorIP);
     int operatorID = this->queryExec(query)[0].toObject()["ID"].toInt();
     QDateTime now = QDateTime::currentDateTime();
-    QString nowStr = now.toString("yyyy-MM-dd hh:mm:ss");
+    QString nowStr = now.toString("yyyy-MM-dd hh:mm:SS");
 
     //QSqlQuery query;
     query.prepare("UPDATE task SET" \
