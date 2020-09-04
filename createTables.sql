@@ -29,7 +29,7 @@ CREATE TABLE service (
 CREATE TABLE task (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     tbegin DATETIME DEFAULT CURRENT_TIMESTAMP,
-        taccept DATETIME,
+    taccept DATETIME,
     tend DATETIME,
     ticket TEXT(4),
     operator_ID integer,

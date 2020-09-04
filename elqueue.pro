@@ -36,3 +36,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     createTables.sql
+
+
+INCLUDEPATH += "d://soft//Firebird_3_0//include//"
+LIBS += "d://soft//Firebird_3_0//lib//fbclient_ms.lib"
+

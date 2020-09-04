@@ -130,5 +130,4 @@ QString ElServer::taskListToJsonString(const QList<Task *> tasks)
 bool ElServer::writeData(QByteArray data, QTcpSocket *_socket)
 {
     _socket->write(data + "$");
-
 }
